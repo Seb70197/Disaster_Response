@@ -1,15 +1,14 @@
 import json
 import plotly
 import pandas as pd
-
 from nltk.stem import WordNetLemmatizer
 from nltk.tokenize import word_tokenize
-
 from flask import Flask
 from flask import render_template, request, jsonify
 from plotly.graph_objs import Bar
-from plotly.graph_objs import Pie
-from sklearn.externals import joblib
+import joblib
+import numpy as np
+
 from sqlalchemy import create_engine
 
 
@@ -45,8 +44,8 @@ def index():
     genre_names = list(genre_counts.index)
     
     #preparation of the data for the second visual
-    visual = df.groupby('genre').sum().drop(columns='id').transpose()
-    visual['total_data'] = visual['direct']+visual['news']+visual['social']
+    visual = df.groupby('genre').sum().drop(columns='id').transpose().reset_index()
+    visual['total_data'] = visual[['direct','news','social']].values.sum(axis=1)
     visual = visual.sort_values(by='total_data', ascending=False).reset_index()
     #limit data to the top 10 Categories
     visual = visual[['index','total_data']][0:10]
